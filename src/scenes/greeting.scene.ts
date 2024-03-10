@@ -17,6 +17,7 @@ greetingScene.enter(async (ctx) => {
 
     if (ctx.from && await UserService.checkIfExists(ctx.from.id)) {
         ctx.reply('Такой пользователь уже существует');
+        ctx.scene.leave();
         ctx.scene.enter("menu");
         return;
     }

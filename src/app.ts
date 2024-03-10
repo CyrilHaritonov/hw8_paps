@@ -8,13 +8,14 @@ import "reflect-metadata";
 import { AppDataSource } from "./data-source";
 import { greetingScene } from "./scenes/greeting.scene";
 import { menuScene } from "./scenes/menu.scene";
+import { adminScene } from "./scenes/admin.scene";
 
 class Bot {
     bot: Telegraf<IBotContext>;
     commands: Command[] = [];
 
     constructor(private readonly configService: IConfigService) {
-        const stage = new Scenes.Stage<IBotContext>([greetingScene, menuScene]);
+        const stage = new Scenes.Stage<IBotContext>([greetingScene, menuScene, adminScene]);
         this.bot = new Telegraf<IBotContext>(this.configService.get("TOKEN"));
         this.bot.use(session());
         this.bot.use(stage.middleware())

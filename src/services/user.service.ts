@@ -24,7 +24,7 @@ export class UserService {
 
     static async getUserInfo(user_id: number): Promise<User> {
         const result: User[] = await this.userRepo.findBy({id: user_id});
-        if (result.length != 0) {
+        if (result.length) {
             return result[0];
         } else {
             throw Error("No user with such id");
