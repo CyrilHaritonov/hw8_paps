@@ -17,4 +17,17 @@ export class UserService {
     static async checkIfExists(user_id: number): Promise<boolean> {
         return await this.userRepo.existsBy({ id: user_id });
     }
+
+    static async checkIfAdmin(user_id: number): Promise<boolean> {
+        return await this.userRepo.existsBy({ id: user_id, is_admin: true })
+    }
+
+    static async getUserInfo(user_id: number): Promise<User> {
+        const result: User[] = await this.userRepo.findBy({id: user_id});
+        if (result.length != 0) {
+            return result[0];
+        } else {
+            throw Error("No user with such id");
+        }
+    }
 }
