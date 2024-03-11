@@ -11,6 +11,8 @@ export class UserService {
         newUser.avatar = avatar;
         newUser.is_admin = false;
         newUser.id = id;
+        newUser.money = 1000;
+        newUser.rm_currency = 100;
         this.userRepo.save(newUser);
     }
 
@@ -29,5 +31,31 @@ export class UserService {
         } else {
             throw Error("No user with such id");
         }
+    }
+
+    static async checkMoneyBalance(user_id: number): Promise<number> {
+        const result: User[] = await this.userRepo.findBy({id: user_id});
+        if (result.length) {
+            return result[0].money;
+        } else {
+            throw Error("No user with such id");
+        }
+    }
+
+    static async checkRMCurrencyBalance(user_id: number): Promise<number> {
+        const result: User[] = await this.userRepo.findBy({id: user_id});
+        if (result.length) {
+            return result[0].rm_currency;
+        } else {
+            throw Error("No user with such id");
+        }
+    }
+
+    static payWithMoney(user_id: number, amount: number): void {
+        this.userRepo.decrement({id: user_id}, "money", amount);
+    }
+
+    static payWithRMCurrency(user_id: number, amount: number): void {
+        this.userRepo.decrement({id: user_id}, "rm_currency", amount);
     }
 }

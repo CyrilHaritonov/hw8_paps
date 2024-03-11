@@ -52,7 +52,7 @@ menuScene.enter(async (ctx) => {
             inventory_displayed.push({ name: (await ItemService.getItem(item.item_id)).name });
         }
 
-        ctx.reply(`В инвентаре содержится: ${inventory_displayed.map(item => "\n" + item.name)}`, Markup.inlineKeyboard([Markup.button.callback("Вернуться в меню", "open_menu")]));
+        ctx.reply(`В инвентаре содержится: ${inventory_displayed.map((item, index) => "\n" + (index + 1) + ". " + item.name)}`, Markup.inlineKeyboard([Markup.button.callback("Вернуться в меню", "open_menu")]));
     });
 
     menuScene.action("open_menu", ctx => {
@@ -60,6 +60,12 @@ menuScene.enter(async (ctx) => {
         ctx.scene.leave();
         ctx.scene.enter("menu");
     });
+
+    menuScene.action("shop", ctx => {
+        ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+        ctx.scene.leave();
+        ctx.scene.enter("shop");
+    })
 })
 
 function escapeHtml(html: string) {

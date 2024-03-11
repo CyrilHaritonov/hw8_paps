@@ -10,11 +10,17 @@ export class User {
     char_name: string;
 
     @Column()
-    avatar: string
+    avatar: string;
 
     @Column()
-    is_admin: boolean
+    is_admin: boolean;
 
     @Column()
-    char_class: string
+    char_class: string;
+
+    @Column("int")
+    money: number;
+
+    @Column("int")
+    rm_currency: number;
 }

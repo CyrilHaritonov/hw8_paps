@@ -1,5 +1,4 @@
 import { Context, Scenes } from "telegraf";
-import { SceneContext, SceneSession } from "telegraf/typings/scenes";
 
 export interface SessionData {
     

@@ -54,6 +54,8 @@ greetingScene.enter(async (ctx) => {
             UserService.create(formState.id, formState.char_name, formState.char_class, formState.avatar);
             formState.stage = 0;
             ctx.reply("Ваш персонаж был успешно создан!");
+            ctx.scene.leave()
+            ctx.scene.enter("menu");
         }
     });
 

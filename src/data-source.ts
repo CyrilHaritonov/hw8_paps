@@ -4,6 +4,7 @@ import { User } from "./entity/User"
 import { ConfigService } from "./config/config.service"
 import { Item } from "./entity/Item";
 import { Inventory } from "./entity/Inventory";
+import { Shop } from "./entity/Shop";
 
 const configService = new ConfigService();
 
@@ -16,7 +17,7 @@ export const AppDataSource = new DataSource({
     database: configService.get("database"),
     synchronize: true,
     logging: false,
-    entities: [User, Item, Inventory],
+    entities: [User, Item, Inventory, Shop],
     migrations: [],
     subscribers: [],
 })

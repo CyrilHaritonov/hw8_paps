@@ -8,9 +8,15 @@ export class Item {
     @Column()
     name: string;
 
-    @Column("int")
-    price: number;
+    @Column()
+    slot: string;
 
-    @Column("int")
-    rm_price: number;
+    @Column()
+    picture: string;
+
+    @Column()
+    description: string;
+
+    @Column("real")
+    power: number;
 }

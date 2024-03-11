@@ -14,4 +14,8 @@ export class InventoryService {
     static getInventory(user_id: number): Promise<Inventory[]> {
         return this.InventRepo.findBy({owner: user_id});
     }
+
+    static delete(id: number) {
+        this.InventRepo.softDelete(id);
+    }
 }

@@ -4,11 +4,13 @@ import { Item } from "../entity/Item";
 export class ItemService {
     private static itemRepo = AppDataSource.getRepository(Item);
 
-    static create(item_name: string, price: number, rm_price: number): void {
+    static create(item_name: string, description: string, slot: string, picture: string, power: number): void {
         const newItem = new Item();
         newItem.name = item_name;
-        newItem.price = price;
-        newItem.rm_price = rm_price;
+        newItem.description = description;
+        newItem.picture = picture;
+        newItem.slot = slot;
+        newItem.power = power;
         this.itemRepo.save(newItem);
     }
 
