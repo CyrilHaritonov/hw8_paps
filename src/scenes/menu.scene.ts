@@ -15,7 +15,7 @@ menuScene.enter(async (ctx) => {
     console.log("inside menu");
     const inlineKeyboard = [
         Markup.button.callback('Инвентарь', 'inventory'),
-        Markup.button.callback('Биржа', 'player_market'),
+        Markup.button.callback('Рынок', 'player_market'),
         Markup.button.callback('Магазин', 'shop'),
         Markup.button.callback('Казино', 'casino')
     ];
