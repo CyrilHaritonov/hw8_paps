@@ -15,7 +15,7 @@ export class InventoryService {
         return this.InventRepo.findBy({owner: user_id});
     }
 
-    static delete(id: number) {
-        this.InventRepo.softDelete(id);
+    static async delete(id: number) {
+        await this.InventRepo.delete(id);
     }
 }

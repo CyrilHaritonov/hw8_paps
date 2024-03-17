@@ -14,20 +14,29 @@ import { createItemScene } from "./scenes/createItem.scene";
 import { giveItemScene } from "./scenes/giveItem.scene";
 import { createOfferScene } from "./scenes/createOffer.scene";
 import { deleteOfferScene } from "./scenes/deleteOffer.scene";
+import { marketScene } from "./scenes/market.scene";
+import { checkOffersScene } from "./scenes/checkOffers.scene";
+import { myOffersScene } from "./scenes/myOffers.scene";
+import { createMarketOfferScene } from "./scenes/createMarketOffer.scene";
+import { MenuCommand } from "./commands/menu.command";
 
 class Bot {
     bot: Telegraf<IBotContext>;
     commands: Command[] = [];
 
     constructor(private readonly configService: IConfigService) {
-        const stage = new Scenes.Stage<IBotContext>([greetingScene, menuScene, adminScene, shopScene, createItemScene, giveItemScene, createOfferScene, deleteOfferScene]);
+        const stage = new Scenes.Stage<IBotContext>([
+            greetingScene, menuScene, adminScene,
+            shopScene, createItemScene, giveItemScene,
+            createOfferScene, deleteOfferScene, marketScene,
+            checkOffersScene, myOffersScene, createMarketOfferScene]);
         this.bot = new Telegraf<IBotContext>(this.configService.get("TOKEN"));
         this.bot.use(session());
         this.bot.use(stage.middleware())
     }
 
     init() {
-        this.commands = [new StartCommand(this.bot)];
+        this.commands = [new StartCommand(this.bot), new MenuCommand(this.bot)];
         for (const command of this.commands) {
             command.handle();
         }

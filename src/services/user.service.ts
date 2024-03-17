@@ -58,4 +58,12 @@ export class UserService {
     static payWithRMCurrency(user_id: number, amount: number): void {
         this.userRepo.decrement({id: user_id}, "rm_currency", amount);
     }
+
+    static getMoney(user_id: number, amount: number): void {
+        this.userRepo.increment({id: user_id}, "money", amount);
+    }
+
+    static getRMCurrency(user_id: number, amount: number): void {
+        this.userRepo.increment({id: user_id}, "rm_currency", amount);
+    }
 }

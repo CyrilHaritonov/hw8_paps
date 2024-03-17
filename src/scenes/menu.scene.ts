@@ -6,7 +6,7 @@ import { ItemService } from "../services/item.service";
 
 export const menuScene = new Scenes.BaseScene<IBotContext>("menu");
 
-type InventoryDisplayed = {
+export type InventoryDisplayed = {
     name: string
 }
 
@@ -15,7 +15,7 @@ menuScene.enter(async (ctx) => {
     console.log("inside menu");
     const inlineKeyboard = [
         Markup.button.callback('Инвентарь', 'inventory'),
-        Markup.button.callback('Рынок', 'player_market'),
+        Markup.button.callback('Рынок', 'market'),
         Markup.button.callback('Магазин', 'shop'),
         Markup.button.callback('Казино', 'casino')
     ];
@@ -65,7 +65,13 @@ menuScene.enter(async (ctx) => {
         ctx.editMessageReplyMarkup({ inline_keyboard: [] });
         ctx.scene.leave();
         ctx.scene.enter("shop");
-    })
+    });
+
+    menuScene.action("market", ctx => {
+        ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+        ctx.scene.leave();
+        ctx.scene.enter("market");
+    });
 })
 
 function escapeHtml(html: string) {

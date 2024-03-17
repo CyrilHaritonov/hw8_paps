@@ -22,4 +22,13 @@ export class ItemService {
             throw Error("No item with such id!");
         }
     }
+
+    static async getIdWithName(item_name: string): Promise<number> {
+        const res: Item[] = await this.itemRepo.findBy({name: item_name});
+        if (res.length) {
+            return res[0].id;
+        } else {
+            return 0;
+        }
+    }
 }
