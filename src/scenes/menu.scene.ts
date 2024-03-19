@@ -14,70 +14,86 @@ menuScene.enter(async (ctx) => {
 
     console.log("inside menu");
     const inlineKeyboard = [
-        Markup.button.callback('Инвентарь', 'inventory'),
+        [Markup.button.callback('Инвентарь', 'inventory'),
         Markup.button.callback('Рынок', 'market'),
-        Markup.button.callback('Магазин', 'shop'),
-        Markup.button.callback('Казино', 'casino')
+        Markup.button.callback('Магазин', 'shop')],
+        [Markup.button.callback('Казино', 'casino'),
+        Markup.button.callback('Экипировка', 'equipment')]
     ];
 
     if (!ctx.from) {
         return;
     }
 
-    if (await UserService.checkIfAdmin(ctx.from.id)) {
-        inlineKeyboard.push(Markup.button.callback('Админ-панель', 'admin-dashboard'));
+    if (!await UserService.checkIfExists(ctx.from.id)) {
+        ctx.scene.leave();
+        ctx.scene.enter("greeting");
+    } else {
+
+        if (await UserService.checkIfAdmin(ctx.from.id)) {
+            inlineKeyboard[1].push(Markup.button.callback('Админ-панель', 'admin-dashboard'));
+        }
+
+        const userData = await UserService.getUserInfo(ctx.from.id);
+
+        ctx.replyWithPhoto(userData.avatar, {
+            caption: `${escapeHtml(userData.char_name)}, ${userData.level} уровень, персонаж класса ${escapeHtml(userData.char_class)},\nНа счету ${userData.money} денег и ${userData.rm_currency} золота`,
+            reply_markup: { inline_keyboard: inlineKeyboard }
+        });
+
+        menuScene.action('admin-dashboard', async ctx => {
+            if (!await UserService.checkIfAdmin(ctx.from.id)) {
+                return;
+            }
+            ctx.scene.leave();
+            ctx.scene.enter('admin');
+            ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+        });
+
+        menuScene.action('inventory', async ctx => {
+            ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+
+            const inventory = await InventoryService.getInventory(ctx.from.id);
+
+            const inventory_displayed: InventoryDisplayed[] = [];
+
+            for (let item of inventory) {
+                inventory_displayed.push({ name: (await ItemService.getItem(item.item_id)).name });
+            }
+
+            ctx.reply(`В инвентаре содержится: ${inventory_displayed.map((item, index) => "\n" + (index + 1) + ". " + item.name)}`, Markup.inlineKeyboard([Markup.button.callback("Вернуться в меню", "open_menu")]));
+        });
+
+        menuScene.action("open_menu", ctx => {
+            ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+            ctx.scene.leave();
+            ctx.scene.enter("menu");
+        });
+
+        menuScene.action("shop", ctx => {
+            ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+            ctx.scene.leave();
+            ctx.scene.enter("shop");
+        });
+
+        menuScene.action("market", ctx => {
+            ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+            ctx.scene.leave();
+            ctx.scene.enter("market");
+        });
+
+        menuScene.action("casino", ctx => {
+            ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+            ctx.scene.leave();
+            ctx.scene.enter("casino");
+        });
+
+        menuScene.action("equipment", ctx => {
+            ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+            ctx.scene.leave();
+            ctx.scene.enter("equipment");
+        });
     }
-
-    const userData = await UserService.getUserInfo(ctx.from.id);
-
-    const message = await ctx.replyWithHTML(`<b>${escapeHtml(userData.char_name)}</b>, персонаж класса <b>${escapeHtml(userData.char_class)}</b>,\nЯвляется админом: ${escapeHtml(userData.is_admin ? "Да" : "Нет")}`, Markup.inlineKeyboard(inlineKeyboard));
-
-    menuScene.action('admin-dashboard', async ctx => {
-        if (!await UserService.checkIfAdmin(ctx.from.id)) {
-            return;
-        }
-        ctx.scene.leave();
-        ctx.scene.enter('admin');
-        ctx.editMessageReplyMarkup({ inline_keyboard: [] });
-    });
-
-    menuScene.action('inventory', async ctx => {
-        ctx.editMessageReplyMarkup({ inline_keyboard: [] });
-
-        const inventory = await InventoryService.getInventory(ctx.from.id);
-
-        const inventory_displayed: InventoryDisplayed[] = [];
-
-        for (let item of inventory) {
-            inventory_displayed.push({ name: (await ItemService.getItem(item.item_id)).name });
-        }
-
-        ctx.reply(`В инвентаре содержится: ${inventory_displayed.map((item, index) => "\n" + (index + 1) + ". " + item.name)}`, Markup.inlineKeyboard([Markup.button.callback("Вернуться в меню", "open_menu")]));
-    });
-
-    menuScene.action("open_menu", ctx => {
-        ctx.editMessageReplyMarkup({ inline_keyboard: [] });
-        ctx.scene.leave();
-        ctx.scene.enter("menu");
-    });
-
-    menuScene.action("shop", ctx => {
-        ctx.editMessageReplyMarkup({ inline_keyboard: [] });
-        ctx.scene.leave();
-        ctx.scene.enter("shop");
-    });
-
-    menuScene.action("market", ctx => {
-        ctx.editMessageReplyMarkup({ inline_keyboard: [] });
-        ctx.scene.leave();
-        ctx.scene.enter("market");
-    });
-
-    menuScene.action("casino", ctx => {
-        ctx.editMessageReplyMarkup({ inline_keyboard: [] });
-        ctx.scene.leave();
-        ctx.scene.enter("casino");
-    });
 })
 
 function escapeHtml(html: string) {

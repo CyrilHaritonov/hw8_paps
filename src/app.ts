@@ -22,6 +22,9 @@ import { MenuCommand } from "./commands/menu.command";
 import { casinoScene } from "./scenes/casino.scene";
 import { createGameScene } from "./scenes/createGame.scene";
 import { deleteGameScene } from "./scenes/deleteGame.scene";
+import { equipmentScene } from "./scenes/equipment.scene";
+import { equipItemScene } from "./scenes/equipItem.scene";
+import { manageAvatarScene } from "./scenes/manageAvatar.scene";
 
 class Bot {
     bot: Telegraf<IBotContext>;
@@ -33,7 +36,8 @@ class Bot {
             shopScene, createItemScene, giveItemScene,
             createOfferScene, deleteOfferScene, marketScene,
             checkOffersScene, myOffersScene, createMarketOfferScene,
-            casinoScene, createGameScene, deleteGameScene]);
+            casinoScene, createGameScene, deleteGameScene,
+            equipmentScene, equipItemScene, manageAvatarScene]);
         this.bot = new Telegraf<IBotContext>(this.configService.get("TOKEN"));
         this.bot.use(session());
         this.bot.use(stage.middleware())

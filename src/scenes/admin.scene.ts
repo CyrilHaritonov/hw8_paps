@@ -13,6 +13,7 @@ adminScene.enter(async (ctx) => {
         Markup.button.callback('Удалить предложение в магазине', 'delete_offer'),],
         [Markup.button.callback('Создать игру в казино', 'create_game'),
         Markup.button.callback('Удалить игру в казино', 'delete_game'),
+        Markup.button.callback('Аватарки', 'manage_avatars'),
         Markup.button.callback('Вернуться в меню', 'back_to_menu')]
     ];
 
@@ -72,5 +73,11 @@ adminScene.enter(async (ctx) => {
         ctx.editMessageReplyMarkup({ inline_keyboard: [] });
         ctx.scene.leave();
         ctx.scene.enter("delete_game");
+    });
+
+    adminScene.action("manage_avatars", ctx => {
+        ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+        ctx.scene.leave();
+        ctx.scene.enter("manage_avatars");
     });
 })

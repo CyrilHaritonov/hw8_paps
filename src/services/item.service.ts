@@ -15,7 +15,16 @@ export class ItemService {
     }
 
     static async getItem(item_id: number): Promise<Item> {
-        const res: Item[] = await this.itemRepo.findBy({id: item_id});
+        if (item_id === 0) {
+            const newItem = new Item();
+            newItem.name = "Нет";
+            newItem.description = "";
+            newItem.picture = "";
+            newItem.slot = "";
+            newItem.power = 0;
+            return newItem;
+        }
+        const res: Item[] = await this.itemRepo.findBy({ id: item_id });
         if (res.length) {
             return res[0];
         } else {
@@ -24,11 +33,20 @@ export class ItemService {
     }
 
     static async getIdWithName(item_name: string): Promise<number> {
-        const res: Item[] = await this.itemRepo.findBy({name: item_name});
+        const res: Item[] = await this.itemRepo.findBy({ name: item_name });
         if (res.length) {
             return res[0].id;
         } else {
             return 0;
+        }
+    }
+
+    static async getItemSlot(item_id: number): Promise<string> {
+        const res: Item[] = await this.itemRepo.findBy({ id: item_id });
+        if (res.length) {
+            return res[0].slot;
+        } else {
+            throw Error("No item with such id!");
         }
     }
 }
