@@ -8,15 +8,18 @@ export class Casino {
     @Column()
     name: string;
     
-    @Column()
+    @Column({type: 'varchar', array: true})
     outcomes: string[];
 
-    @Column()
+    @Column({type: 'real', array: true})
     chances: number[];
 
-    @Column()
+    @Column({type: 'int', array: true})
     prizes: number[];
 
-    @Column()
+    @Column({type: 'varchar', array: true})
     pictures: string[];
+
+    @Column("int")
+    price: number;
 }

@@ -72,6 +72,12 @@ menuScene.enter(async (ctx) => {
         ctx.scene.leave();
         ctx.scene.enter("market");
     });
+
+    menuScene.action("casino", ctx => {
+        ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+        ctx.scene.leave();
+        ctx.scene.enter("casino");
+    });
 })
 
 function escapeHtml(html: string) {
