@@ -41,7 +41,7 @@ shopScene.enter(async ctx => {
         });
     }
 
-    ctx.reply(`Есть следующие предложения: ${offers_displayed.map((item, index) => "\n" + (index + 1) + ". " + item.name + ", сила: " + item.power + ", цены: " + item.price + " " + item.rm_price) + "\n Чтобы посмотреть нужное предложение подробнее введите его номер"}`, Markup.inlineKeyboard([Markup.button.callback("Вернуться в меню", "open_menu")]));
+    ctx.reply(`Есть следующие предложения: ${offers_displayed.map((item, index) => "\n" + (index + 1) + ". " + item.name + ", сила: " + item.power + ", цены: " + item.price + " денег, " + item.rm_price + " золота") + "\n Чтобы посмотреть нужное предложение подробнее введите его номер"}`, Markup.inlineKeyboard([Markup.button.callback("Вернуться в меню", "open_menu")]));
 
     shopScene.on("text", ctx => {
         const num = parseInt(ctx.message.text);
@@ -54,7 +54,10 @@ shopScene.enter(async ctx => {
             } else if (offers_displayed[num - 1].currency_type === "rm_currency") {
                 inline_keyboard.inline_keyboard.unshift([{ text: 'Купить за золото', callback_data: 'buy_with_rm_currency' }]);
             }
-            ctx.replyWithPhoto({ url: offers_displayed[num - 1].picture }, { reply_markup: inline_keyboard, caption: "Информация о предмете:\nНазвание: " + offers_displayed[num - 1].name + ",\n Сила: " + offers_displayed[num - 1].power + ",\n Цены:" + offers_displayed[num - 1].price + " " + offers_displayed[num - 1].rm_price + ",\n Надевается в слот: " + offers_displayed[num - 1].slot + "\n Описание: " + offers_displayed[num - 1].description });
+            ctx.replyWithPhoto({ url: offers_displayed[num - 1].picture }, { reply_markup: inline_keyboard, caption: "Информация о предмете:\nНазвание: "
+             + offers_displayed[num - 1].name + ",\nСила: " + offers_displayed[num - 1].power + ",\nЦены: " + offers_displayed[num - 1].price 
+             + " " + offers_displayed[num - 1].rm_price + ",\nНадевается в слот: " + offers_displayed[num - 1].slot + "\nОписание: " 
+             + offers_displayed[num - 1].description });
         } else {
             ctx.reply("Неправильный номер предложения, попробуйте снова.");
         }

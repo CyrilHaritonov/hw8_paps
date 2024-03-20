@@ -64,8 +64,19 @@ greetingScene.enter(async (ctx) => {
     });
 
     function outputAvatars() {
-        ctx.replyWithMediaGroup(avatars.map(link => { return { type: "photo", media: link } }));
-        ctx.reply("Введите номер вашей аватарки");
+        if (avatars.length > 0) {
+            ctx.replyWithMediaGroup(avatars.map(link => { return { type: "photo", media: link } }));
+            ctx.reply("Введите номер вашей аватарки");
+        } else {
+            formState.avatar = 'https://imgs.search.brave.com/Od-zdPC5JdDndRmvNJUCGoNnOdKantqLuoUugEEV9LA/rs:fit:500:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5pc3RvY2twaG90/by5jb20vaWQvMTQ4/MzkyOTA4L3Bob3Rv/L2RvZy1vbi10aGUt/cGhvbmUuanBnP3M9/NjEyeDYxMiZ3PTAm/az0yMCZjPThNUEdR/NmhFMDV4eDh1VzNs/N3RER3N5NGtqSzlL/LW5ZanRfV0hHN3Zu/aW89';
+            UserService.create(formState.id, formState.char_name, formState.char_class, formState.avatar);
+            formState.stage = 0;
+            ctx.reply("Ваш персонаж был успешно создан!");
+            ctx.scene.leave()
+            setTimeout(() => {
+                ctx.scene.enter("menu");
+            }, 1000);
+        }
     }
 
     greetingScene.action("warrior", ctx => {

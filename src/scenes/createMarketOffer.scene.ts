@@ -14,9 +14,9 @@ createMarketOfferScene.enter(async ctx => {
         return;
     }
 
-    const inventory = await InventoryService.getInventory(ctx.from.id);
+    let inventory = await InventoryService.getInventory(ctx.from.id);
 
-    const inventory_displayed: InventoryDisplayed[] = [];
+    let inventory_displayed: InventoryDisplayed[] = [];
 
     for (let item of inventory) {
         inventory_displayed.push({ name: (await ItemService.getItem(item.item_id)).name });

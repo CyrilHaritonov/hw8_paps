@@ -8,7 +8,7 @@ export const casinoScene = new Scenes.BaseScene<IBotContext>("casino");
 casinoScene.enter(async ctx => {
     console.log("inside casino");
 
-    const games = await CasinoService.getGames();
+    let games = await CasinoService.getGames();
 
     let game_num = -1;
 
@@ -27,7 +27,7 @@ casinoScene.enter(async ctx => {
                 }
             }
             game_num = num - 1;
-            ctx.reply("Информация о игре: \n" + games[num - 1].name + "\nЦена участия:" + games[num - 1].price + "\nВозможные призы: " +
+            ctx.reply("Информация о игре: \n" + games[num - 1].name + "\nЦена участия: " + games[num - 1].price + "\nВозможные призы: " +
                 prizes.filter(value => value !== "Ничего").join(", "),
                 Markup.inlineKeyboard([Markup.button.callback("Играть", "play"), Markup.button.callback("Вернуться к списку", "back")]));
         } else {
