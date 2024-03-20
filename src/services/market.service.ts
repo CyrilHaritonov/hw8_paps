@@ -17,7 +17,7 @@ export class MarketService {
         this.marketRepo.save(new_offer);
     }
 
-    static async delete(offer_id: number): Promise<boolean> {
+    static async retriveItem(offer_id: number): Promise<boolean> {
         const offer = await this.marketRepo.findBy({ id: offer_id });
         if (offer.length === 0) {
             return new Promise(resolve => {
@@ -25,7 +25,19 @@ export class MarketService {
             })
         }
         InventoryService.create(offer[0].owner_id, offer[0].item_id);
-        console.log(offer_id);
+        await this.marketRepo.delete(offer_id);
+        return new Promise(resolve => {
+            resolve(true);
+        })
+    }
+
+    static async delete(offer_id: number): Promise<boolean> {
+        const offer = await this.marketRepo.findBy({ id: offer_id });
+        if (offer.length === 0) {
+            return new Promise(resolve => {
+                resolve(false);
+            })
+        }
         await this.marketRepo.delete(offer_id);
         return new Promise(resolve => {
             resolve(true);

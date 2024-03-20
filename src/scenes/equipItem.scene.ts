@@ -4,6 +4,7 @@ import { InventoryService } from "../services/inventory.service";
 import { UserService } from "../services/user.service";
 import { InlineKeyboardMarkup } from "telegraf/typings/core/types/typegram";
 import { userInfo } from "os";
+import { deleteMarkup } from "../lib/deleteMarkup";
 
 export const equipItemScene = new Scenes.BaseScene<IBotContext>("equip_item");
 
@@ -19,9 +20,11 @@ equipItemScene.enter(ctx => {
         const inventory = await InventoryService.getInventoryWithSlot(ctx.from.id, current_slot);
 
         if (num === 0) {
+            deleteMarkup(ctx, ctx.chat.id, ctx.message.message_id - 1);
             UserService.removeItemFromSlot(ctx.from.id, current_slot);
             ctx.reply("Вы успешно убрали предмет из слота: " + current_slot, Markup.inlineKeyboard([Markup.button.callback("Вернуться", "back_to_equipment")]));
         } else if (num > 0 && num <= items.length) {
+            deleteMarkup(ctx, ctx.chat.id, ctx.message.message_id - 1);
             UserService.putItemInSlot(ctx.from.id, inventory[num - 1].id, current_slot);
             ctx.reply("Вы успешно экипировали предмет: " + items[num - 1].name + " в слот: " + current_slot,
                 Markup.inlineKeyboard([Markup.button.callback("Вернуться", "back_to_equipment")]));

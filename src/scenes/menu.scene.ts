@@ -37,8 +37,9 @@ menuScene.enter(async (ctx) => {
         const userData = await UserService.getUserInfo(ctx.from.id);
 
         ctx.replyWithPhoto(userData.avatar, {
-            caption: `${escapeHtml(userData.char_name)}, ${userData.level} уровень, персонаж класса ${escapeHtml(userData.char_class)},\nНа счету ${userData.money} денег и ${userData.rm_currency} золота`,
-            reply_markup: { inline_keyboard: inlineKeyboard }
+            caption: `<b>${escapeHtml(userData.char_name)}</b>, ${userData.level} уровень, персонаж класса ${escapeHtml(userData.char_class)},\nНа счету ${userData.money} денег и ${userData.rm_currency} золота`,
+            reply_markup: { inline_keyboard: inlineKeyboard 
+            }, parse_mode: "HTML"
         });
 
         menuScene.action('admin-dashboard', async ctx => {

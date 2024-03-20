@@ -4,6 +4,7 @@ import { ShopService } from "../services/shop.service";
 import { ItemService } from "../services/item.service";
 import { Markup, Scenes } from "telegraf";
 import { InlineKeyboardMarkup } from "telegraf/typings/core/types/typegram";
+import { deleteMarkup } from "../lib/deleteMarkup";
 
 export const shopScene = new Scenes.BaseScene<IBotContext>("shop");
 
@@ -44,6 +45,7 @@ shopScene.enter(async ctx => {
     ctx.reply(`Есть следующие предложения: ${offers_displayed.map((item, index) => "\n" + (index + 1) + ". " + item.name + ", сила: " + item.power + ", цены: " + item.price + " денег, " + item.rm_price + " золота") + "\n Чтобы посмотреть нужное предложение подробнее введите его номер"}`, Markup.inlineKeyboard([Markup.button.callback("Вернуться в меню", "open_menu")]));
 
     shopScene.on("text", ctx => {
+        deleteMarkup(ctx, ctx.chat.id, ctx.message.message_id - 1);
         const num = parseInt(ctx.message.text);
         if (num > 0 && num <= offers_displayed.length) {
             const inline_keyboard: InlineKeyboardMarkup = {inline_keyboard: [[{ text: 'Назад', callback_data: 'shop' }]]};
@@ -59,7 +61,7 @@ shopScene.enter(async ctx => {
              + " " + offers_displayed[num - 1].rm_price + ",\nНадевается в слот: " + offers_displayed[num - 1].slot + "\nОписание: " 
              + offers_displayed[num - 1].description });
         } else {
-            ctx.reply("Неправильный номер предложения, попробуйте снова.");
+            ctx.reply("Неправильный номер предложения, попробуйте снова.", Markup.inlineKeyboard([Markup.button.callback("Вернуться в меню", "open_menu")]));
         }
         shopScene.action("buy_with_money", ctx => {
             ctx.editMessageReplyMarkup({inline_keyboard: []});

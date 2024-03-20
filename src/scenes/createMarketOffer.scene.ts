@@ -4,6 +4,7 @@ import { InventoryDisplayed } from "./menu.scene";
 import { InventoryService } from "../services/inventory.service";
 import { ItemService } from "../services/item.service";
 import { MarketService } from "../services/market.service";
+import { deleteMarkup } from "../lib/deleteMarkup";
 
 export const createMarketOfferScene = new Scenes.BaseScene<IBotContext>("create_market_offer");
 
@@ -22,21 +23,20 @@ createMarketOfferScene.enter(async ctx => {
         inventory_displayed.push({ name: (await ItemService.getItem(item.item_id)).name });
     }
 
-    ctx.reply(`В инвентаре содержится: ${inventory_displayed.map((item, index) => "\n" + (index + 1) + ". " + item.name)}`,
+    let message = await ctx.reply(`В инвентаре содержится: ${inventory_displayed.map((item, index) => "\n" + (index + 1) + ". " + item.name)}` + "\nВведите номер предмета, который вы хотите выставить:",
         Markup.inlineKeyboard([Markup.button.callback("Вернуться", "back_to_market")]));
-
-    ctx.reply("Введите номер предмета, который вы хотите выставить:");
 
     let stage = 0;
 
     createMarketOfferScene.on('text', async ctx => {
+        deleteMarkup(ctx, message.chat.id, ctx.message.message_id - 1);
         let num = parseInt(ctx.message.text);
         let picked_item: number = 0;
 
         if (stage === 0) {
             if (num <= inventory.length && num > 0) {
                 picked_item = num - 1;
-                ctx.reply("Вы выбрали предмет " + (await ItemService.getItem(inventory[picked_item].item_id)).name + " Теперь введите цену: ",
+                message = await ctx.reply("Вы выбрали предмет " + (await ItemService.getItem(inventory[picked_item].item_id)).name + " Теперь введите цену: ",
                     Markup.inlineKeyboard([Markup.button.callback('Вернуться назад', 'back_to_market')]));
                 stage = stage + 1;
             } else {
@@ -50,6 +50,7 @@ createMarketOfferScene.enter(async ctx => {
     });
 
     createMarketOfferScene.action('back_to_market', ctx => {
+        stage = 0;
         ctx.editMessageReplyMarkup({ inline_keyboard: [] });
         ctx.scene.leave();
         ctx.scene.enter("market");

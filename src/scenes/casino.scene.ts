@@ -2,6 +2,7 @@ import { Markup, Scenes } from "telegraf";
 import { IBotContext } from "../context/context.interface";
 import { CasinoService } from "../services/casino.service";
 import { ItemService } from "../services/item.service";
+import { deleteMarkup } from "../lib/deleteMarkup";
 
 export const casinoScene = new Scenes.BaseScene<IBotContext>("casino");
 
@@ -12,10 +13,11 @@ casinoScene.enter(async ctx => {
 
     let game_num = -1;
 
-    ctx.reply("Есть следующие игры:" + games.map((game, index) => "\n" + (index + 1) + ". " + game.name) + "\nВведите номер игры, в которую вы хотели бы поиграть",
+    let message = await ctx.reply("Есть следующие игры:" + games.map((game, index) => "\n" + (index + 1) + ". " + game.name) + "\nВведите номер игры, в которую вы хотели бы поиграть",
         Markup.inlineKeyboard([Markup.button.callback("Вернуться", "back_to_menu")]));
 
     casinoScene.on("text", async ctx => {
+        deleteMarkup(ctx, message.chat.id, ctx.message.message_id - 1);
         const num = parseInt(ctx.message.text);
         if (num <= games.length && num > 0) {
             const prizes: string[] = [];
