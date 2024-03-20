@@ -18,7 +18,6 @@ createOfferScene.enter(ctx => {
     ctx.reply("Введите название id предмета, который будет продаваться");
     createOfferScene.on('text', ctx => {
         const text = ctx.message.text;
-        // TODO: проверки корректного ввода
         switch (formState.stage) {
             case 0:
                 formState.item_id = parseInt(text);

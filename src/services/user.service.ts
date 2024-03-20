@@ -69,8 +69,8 @@ export class UserService {
         this.userRepo.increment({ id: user_id }, "rm_currency", amount);
     }
 
-    static addLevels(user_id: number, amount: number): void {
-        this.userRepo.increment({ id: user_id }, "level", amount);
+    static addToUser(user_id: number, amount: number, variable: string): void {
+        this.userRepo.increment({ id: user_id }, variable, amount);
     }
 
     static async putItemInSlot(user_id: number, inventory_id: number, slot: string): Promise<void> {

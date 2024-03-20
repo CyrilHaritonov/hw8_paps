@@ -13,7 +13,6 @@ giveItemScene.enter(ctx => {
     }
 
     giveItemScene.on('text', ctx => {
-        // TODO: проверки корректности ввода
         const text = ctx.message.text;
         switch(formState.stage) {
             case 0:

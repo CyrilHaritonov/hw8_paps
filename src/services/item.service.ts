@@ -28,7 +28,7 @@ export class ItemService {
         if (res.length) {
             return res[0];
         } else {
-            throw Error("No item with such id!");
+            throw Error("No item with such id" + item_id);
         }
     }
 
@@ -46,7 +46,7 @@ export class ItemService {
         if (res.length) {
             return res[0].slot;
         } else {
-            throw Error("No item with such id!");
+            throw Error("No item with such id" + item_id);
         }
     }
 }

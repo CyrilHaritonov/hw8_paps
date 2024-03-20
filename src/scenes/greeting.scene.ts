@@ -25,31 +25,27 @@ greetingScene.enter(async (ctx) => {
 
     const avatars = await AvatarsService.getAllAvatars();
 
-    ctx.reply("Введите имя своего персонажа");
+    ctx.reply("Введите имя своего персонажа (от 3 до до 15 символов)");
 
     greetingScene.on('text', (ctx) => {
         const typedText = ctx.message.text;
         switch (formState.stage) {
             case 0:
-                // TODO: проверки на правильность введенного имени
+                if (typedText.length < 3 || typedText.length > 15) {
+                    ctx.reply("Неправильная длина имени, попробуйте ещё");
+                    break;
+                }
                 formState.char_name = typedText;
                 formState.id = ctx.from.id;
                 formState.stage++;
                 ctx.reply("Выберите класс вашего персонажа",
-                    Markup.keyboard([
-                        Markup.button.callback('Воин', 'class1'),
-                        Markup.button.callback('Маг', 'class2'),
-                        Markup.button.callback('Танк', 'class3')]).resize().oneTime()
+                    Markup.inlineKeyboard([
+                        Markup.button.callback('Воин', 'warrior'),
+                        Markup.button.callback('Маг', 'mage'),
+                        Markup.button.callback('Танк', 'tank')])
                 );
                 break;
             case 1:
-                // TODO: проверки на правильность введенного класса
-                formState.char_class = ctx.message.text;
-                formState.stage++;
-                ctx.replyWithMediaGroup(avatars.map(link => { return { type: "photo", media: link } }));
-                ctx.reply("Введите номер вашей аватарки");
-                break;
-            case 2:
                 const num = parseInt(ctx.message.text);
                 if (!(num > 0 && num <= avatars.length)) {
                     ctx.reply("Неправильный номер аватара, попробуйте ещё");
@@ -67,4 +63,23 @@ greetingScene.enter(async (ctx) => {
         }
     });
 
+    function outputAvatars() {
+        ctx.replyWithMediaGroup(avatars.map(link => { return { type: "photo", media: link } }));
+        ctx.reply("Введите номер вашей аватарки");
+    }
+
+    greetingScene.action("warrior", ctx => {
+        formState.char_class = "warrior";
+        outputAvatars();
+    });
+
+    greetingScene.action("mage", ctx => {
+        formState.char_class = "mage";
+        outputAvatars();
+    });
+
+    greetingScene.action("tank", ctx => {
+        formState.char_class = "tank";
+        outputAvatars();
+    });
 });
