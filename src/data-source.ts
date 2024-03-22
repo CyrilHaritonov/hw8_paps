@@ -8,6 +8,8 @@ import { Shop } from "./entity/Shop";
 import { Market } from "./entity/Market";
 import { Casino } from "./entity/Casino";
 import { Avatars } from "./entity/Avatars";
+import { Plant } from "./entity/Plant";
+import { Pot } from "./entity/Pot";
 
 const configService = new ConfigService();
 
@@ -20,7 +22,7 @@ export const AppDataSource = new DataSource({
     database: configService.get("database"),
     synchronize: true,
     logging: false,
-    entities: [User, Item, Inventory, Shop, Market, Casino, Avatars],
+    entities: [User, Item, Inventory, Shop, Market, Casino, Avatars, Plant, Pot],
     migrations: [],
     subscribers: [],
 })

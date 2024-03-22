@@ -26,6 +26,9 @@ import { equipmentScene } from "./scenes/equipment.scene";
 import { equipItemScene } from "./scenes/equipItem.scene";
 import { manageAvatarScene } from "./scenes/manageAvatar.scene";
 import { giveToUserScene } from "./scenes/giveToUser.scene";
+import { gardenScene } from "./scenes/garden.scene";
+import { managePlantsScene } from "./scenes/managePlants.scene";
+import { addPlantScene } from "./scenes/addPlant.scene";
 
 class Bot {
     bot: Telegraf<IBotContext>;
@@ -39,7 +42,7 @@ class Bot {
             checkOffersScene, myOffersScene, createMarketOfferScene,
             casinoScene, createGameScene, deleteGameScene,
             equipmentScene, equipItemScene, manageAvatarScene,
-            giveToUserScene]);
+            giveToUserScene, gardenScene, managePlantsScene, addPlantScene]);
         this.bot = new Telegraf<IBotContext>(this.configService.get("TOKEN"));
         this.bot.use(session());
         this.bot.use(stage.middleware())

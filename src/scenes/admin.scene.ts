@@ -14,6 +14,7 @@ adminScene.enter(async (ctx) => {
         [Markup.button.callback('Создать игру в казино', 'create_game'),
         Markup.button.callback('Удалить игру в казино', 'delete_game'),
         Markup.button.callback('Аватарки', 'manage_avatars'),
+        Markup.button.callback('Растения', 'manage_plants'),
         Markup.button.callback('Выдать пользователю уровни или деньги', "give_to_user")],
         [Markup.button.callback('Вернуться в меню', 'back_to_menu')]
     ];
@@ -86,5 +87,11 @@ adminScene.enter(async (ctx) => {
         ctx.editMessageReplyMarkup({ inline_keyboard: [] });
         ctx.scene.leave();
         ctx.scene.enter("give_to_user");
+    });
+
+    adminScene.action("manage_plants", ctx => {
+        ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+        ctx.scene.leave();
+        ctx.scene.enter("manage_plants");
     });
 })

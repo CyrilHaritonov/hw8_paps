@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryColumn } from "typeorm"
+import { Entity, Column, PrimaryColumn, OneToOne, JoinColumn } from "typeorm"
+import { Pot } from "./Pot";
 
 @Entity()
 export class User {
@@ -47,4 +48,25 @@ export class User {
 
     @Column({default: 0})
     thorax_item_equiped: number;
+
+    // gardening
+    @OneToOne(() => Pot, { nullable: true })
+    @JoinColumn()
+    pot_1: Pot | null;
+    
+    @OneToOne(() => Pot, { nullable: true })
+    @JoinColumn()
+    pot_2: Pot | null;
+    
+    @OneToOne(() => Pot, { nullable: true })
+    @JoinColumn()
+    pot_3: Pot | null;
+    
+    @OneToOne(() => Pot, { nullable: true })
+    @JoinColumn()
+    pot_4: Pot | null;
+    
+    @OneToOne(() => Pot, { nullable: true })
+    @JoinColumn()
+    pot_5: Pot | null;
 }

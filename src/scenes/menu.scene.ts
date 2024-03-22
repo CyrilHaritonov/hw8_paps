@@ -18,7 +18,8 @@ menuScene.enter(async (ctx) => {
         Markup.button.callback('Рынок', 'market'),
         Markup.button.callback('Магазин', 'shop')],
         [Markup.button.callback('Казино', 'casino'),
-        Markup.button.callback('Экипировка', 'equipment')]
+        Markup.button.callback('Экипировка', 'equipment'),
+        Markup.button.callback('Сад', 'garden')]
     ];
 
     if (!ctx.from) {
@@ -93,6 +94,12 @@ menuScene.enter(async (ctx) => {
             ctx.editMessageReplyMarkup({ inline_keyboard: [] });
             ctx.scene.leave();
             ctx.scene.enter("equipment");
+        });
+
+        menuScene.action("garden", ctx => {
+            ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+            ctx.scene.leave();
+            ctx.scene.enter("garden");
         });
     }
 })

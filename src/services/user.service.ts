@@ -1,7 +1,10 @@
 import { AppDataSource } from "../data-source";
+import { Pot, potDict } from "../entity/Pot";
 import { User } from "../entity/User";
 import { InventoryService } from "./inventory.service";
 import { ItemService } from "./item.service";
+import { PlantService } from "./plant.service";
+import { PotService } from "./pot.service";
 
 export class UserService {
     private static userRepo = AppDataSource.getRepository(User);
@@ -15,7 +18,16 @@ export class UserService {
         newUser.id = id;
         newUser.money = 1000;
         newUser.rm_currency = 100;
+        newUser.pot_1 = null
+        newUser.pot_2 = null
+        newUser.pot_3 = null
+        newUser.pot_4 = null
+        newUser.pot_5 = null
         this.userRepo.save(newUser);
+    }
+
+    static async saveUser(user: User) {
+        await this.userRepo.save(user)
     }
 
     static async checkIfExists(user_id: number): Promise<boolean> {
@@ -182,4 +194,88 @@ export class UserService {
             throw Error("Wrong slot");
         }
     }
+
+    static async getUserPotsAndPlants(user_id: number): Promise<UserPotPlantInfo> {
+        const user = await this.userRepo.findOne({
+            where: { id: user_id },
+            relations: ["pot_1", "pot_2", "pot_3", "pot_4", "pot_5", "pot_1.plant", "pot_2.plant", "pot_3.plant", "pot_4.plant", "pot_5.plant"],
+        });
+        if (!user) {
+            throw new Error('User not found');
+        }
+        const pots = [user.pot_1, user.pot_2, user.pot_3, user.pot_4, user.pot_5];
+        const usersPotsAndPlants: UserPotPlantInfo = {
+            userId: user.id,
+            charName: user.char_name,
+            pots: pots
+        };
+        return usersPotsAndPlants;
+    }
+
+    static async purchasePot(userId: number, potNumber: number, currency: string): Promise<Pot | null> {
+        const cost = potDict[potNumber][currency === 'money' ? 0 : 1];
+        const balance = currency === 'money' ? await this.checkMoneyBalance(userId) : await this.checkRMCurrencyBalance(userId);
+
+        if (balance >= cost) {
+            if (currency === 'money') {
+                await this.payWithMoney(userId, cost);
+            } else {
+                await this.payWithRMCurrency(userId, cost);
+            }
+
+            let pot = new Pot();
+            pot.rentedUntil = new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000);
+            await PotService.savePot(pot);
+
+            const user = await this.getUserInfo(userId);
+            switch (potNumber) {
+            case 1:
+                user.pot_1 = pot;
+                break;
+            case 2:
+                user.pot_2 = pot;
+                break;
+            case 3:
+                user.pot_3 = pot;
+                break;
+            case 4:
+                user.pot_4 = pot;
+                break;
+            case 5:
+                user.pot_5 = pot;
+                break;
+            default:
+                break;
+        }
+            await this.saveUser(user);
+            return pot;
+        } else {
+            return null;
+        }
+    }
+
+    static async purchasePlant(userId: number, potNumber: number, plantId: number, currency: string): Promise<boolean> {
+        const plant = await PlantService.getPlantById(plantId);
+        const cost = currency === 'money' ? plant.cost_money : plant.cost_rmcurrency;
+        const balance = currency === 'money' ? await this.checkMoneyBalance(userId) : await this.checkRMCurrencyBalance(userId);
+
+        if (balance >= cost) {
+            if (currency === 'money') {
+                await this.payWithMoney(userId, cost);
+            } else {
+                await this.payWithRMCurrency(userId, cost);
+            }
+
+            await PlantService.addPlantToUserPot(userId, plantId, potNumber);
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+
+interface UserPotPlantInfo {
+    userId: number;
+    charName: string;
+    pots: (Pot | null)[];
 }
