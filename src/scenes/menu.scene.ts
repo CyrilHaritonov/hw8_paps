@@ -6,20 +6,13 @@ import { ItemService } from "../services/item.service";
 
 export const menuScene = new Scenes.BaseScene<IBotContext>("menu");
 
-export type InventoryDisplayed = {
-    name: string
-}
-
 menuScene.enter(async (ctx) => {
 
     console.log("inside menu");
     const inlineKeyboard = [
-        [Markup.button.callback('Инвентарь', 'inventory'),
-        Markup.button.callback('Рынок', 'market'),
-        Markup.button.callback('Магазин', 'shop')],
-        [Markup.button.callback('Казино', 'casino'),
-        Markup.button.callback('Экипировка', 'equipment'),
-        Markup.button.callback('Сад', 'garden')]
+        [Markup.button.callback('⛩️ Торговый квартал', 'shopping_district')],
+        [Markup.button.callback('🥋 Экипировка', 'equipment')],
+        [Markup.button.callback('🏰 Крепость', 'fortress')]
     ];
 
     if (!ctx.from) {
@@ -32,13 +25,23 @@ menuScene.enter(async (ctx) => {
     } else {
 
         if (await UserService.checkIfAdmin(ctx.from.id)) {
-            inlineKeyboard[1].push(Markup.button.callback('Админ-панель', 'admin-dashboard'));
+            inlineKeyboard.push([Markup.button.callback('Админ-панель', 'admin-dashboard')]);
         }
 
         const userData = await UserService.getUserInfo(ctx.from.id);
 
         ctx.replyWithPhoto(userData.avatar, {
-            caption: `<b>${escapeHtml(userData.char_name)}</b>, ${userData.level} уровень, персонаж класса ${escapeHtml(userData.char_class)},\nНа счету ${userData.money} денег и ${userData.rm_currency} золота`,
+            caption: "<b>🐶 " + userData.char_name + "</b>\n\n✨ " + userData.level + " уровень\n⚡ Класс <b>" + 
+                (() => {switch(userData.char_class) {
+                    case "warrior":
+                        return "воин";
+                    case "mage":
+                        return "маг";
+                    case "tank":
+                        return "танк";
+                }})()
+            + "</b>\n🗡 Клан: не состоит в клане"
+            + "\n💸 На счету " + userData.money + " 💰 и " + userData.rm_currency + " 🟡",
             reply_markup: { inline_keyboard: inlineKeyboard 
             }, parse_mode: "HTML"
         });
@@ -52,42 +55,10 @@ menuScene.enter(async (ctx) => {
             ctx.editMessageReplyMarkup({ inline_keyboard: [] });
         });
 
-        menuScene.action('inventory', async ctx => {
-            ctx.editMessageReplyMarkup({ inline_keyboard: [] });
-
-            const inventory = await InventoryService.getInventory(ctx.from.id);
-
-            const inventory_displayed: InventoryDisplayed[] = [];
-
-            for (let item of inventory) {
-                inventory_displayed.push({ name: (await ItemService.getItem(item.item_id)).name });
-            }
-
-            ctx.reply(`В инвентаре содержится: ${inventory_displayed.map((item, index) => "\n" + (index + 1) + ". " + item.name)}`, Markup.inlineKeyboard([Markup.button.callback("Вернуться в меню", "open_menu")]));
-        });
-
         menuScene.action("open_menu", ctx => {
             ctx.editMessageReplyMarkup({ inline_keyboard: [] });
             ctx.scene.leave();
             ctx.scene.enter("menu");
-        });
-
-        menuScene.action("shop", ctx => {
-            ctx.editMessageReplyMarkup({ inline_keyboard: [] });
-            ctx.scene.leave();
-            ctx.scene.enter("shop");
-        });
-
-        menuScene.action("market", ctx => {
-            ctx.editMessageReplyMarkup({ inline_keyboard: [] });
-            ctx.scene.leave();
-            ctx.scene.enter("market");
-        });
-
-        menuScene.action("casino", ctx => {
-            ctx.editMessageReplyMarkup({ inline_keyboard: [] });
-            ctx.scene.leave();
-            ctx.scene.enter("casino");
         });
 
         menuScene.action("equipment", ctx => {
@@ -96,29 +67,16 @@ menuScene.enter(async (ctx) => {
             ctx.scene.enter("equipment");
         });
 
-        menuScene.action("garden", ctx => {
+        menuScene.action("shopping_district", ctx => {
             ctx.editMessageReplyMarkup({ inline_keyboard: [] });
             ctx.scene.leave();
-            ctx.scene.enter("garden");
+            ctx.scene.enter("shopping_district");
+        });
+
+        menuScene.action("fortress", ctx => {
+            ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+            ctx.scene.leave();
+            ctx.scene.enter("fortress");
         });
     }
 })
-
-function escapeHtml(html: string) {
-    return html.replace(/[&<>"']/g, function (match) {
-        switch (match) {
-            case '&':
-                return '&amp;';
-            case '<':
-                return '&lt;';
-            case '>':
-                return '&gt;';
-            case '"':
-                return '&quot;';
-            case "'":
-                return '&#39;';
-            default:
-                return match;
-        }
-    });
-}

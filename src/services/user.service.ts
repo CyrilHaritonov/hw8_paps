@@ -272,6 +272,15 @@ export class UserService {
             return false;
         }
     }
+
+    static async getNameById(userId: number): Promise<string> {
+        const result = await this.userRepo.findBy({id: userId});
+        if (result.length > 0) {
+            return result[0].char_name;
+        } else {
+            throw Error("No user wtih such id" + userId);
+        }
+    }
 }
 
 interface UserPotPlantInfo {

@@ -4,6 +4,7 @@ import { MarketService } from "../services/market.service";
 import { Market } from "../entity/Market";
 import { deleteMarkup } from "../lib/deleteMarkup";
 import { Message } from "telegraf/typings/core/types/typegram";
+import { UserService } from "../services/user.service";
 
 export const checkOffersScene = new Scenes.BaseScene<IBotContext>('check_offers');
 
@@ -22,9 +23,14 @@ checkOffersScene.enter(ctx => {
         if (offers.length === 0) {
             offers = await MarketService.findOffersWithItem(ctx.message.text);
 
-            message = await ctx.reply("Есть следующие предложения:" + offers.map((offer, index) => "\n" + (index + 1)
-                + '. Цена в деньгах: ' + offer.price + " Продавец: " + offer.owner_id)
-                + "\nВведите номер предложения, которое вы хотите купить, либо начните поиск заново",
+            message = await ctx.replyWithHTML("Есть следующие предложения:\n" + await (async () => {
+                const result = [];
+                for (let i = 0; i < offers.length; ++i) {
+                    result.push("\n" + (i + 1) + '. Цена в 💰 <b>' + offers[i].price + "</b> Продавец: " + await UserService.getNameById(offers[i].owner_id))
+                }
+                return result.join("");
+            })()
+                + "\n\nВведите номер предложения, которое вы хотите купить, либо начните поиск заново",
                 Markup.inlineKeyboard([Markup.button.callback('Искать снова', 'search'), Markup.button.callback('Вернуться назад', 'back_to_market')]));
         } else {
             const num = parseInt(ctx.message.text);

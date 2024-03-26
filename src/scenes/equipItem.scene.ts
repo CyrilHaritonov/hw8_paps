@@ -3,16 +3,25 @@ import { IBotContext } from "../context/context.interface";
 import { InventoryService } from "../services/inventory.service";
 import { UserService } from "../services/user.service";
 import { InlineKeyboardMarkup } from "telegraf/typings/core/types/typegram";
-import { userInfo } from "os";
 import { deleteMarkup } from "../lib/deleteMarkup";
 
 export const equipItemScene = new Scenes.BaseScene<IBotContext>("equip_item");
 
-equipItemScene.enter(ctx => {
+equipItemScene.enter(async ctx => {
     console.log("inside equip item");
 
     let current_slot = "";
     let num = -1;
+
+    if (!ctx.from) {
+        return;
+    }
+
+    let tooltips = [];
+
+    for (let slot of ["arms", "legs", "feet", "lefthand", "righthand", "head", "thorax"]) {
+        tooltips.push((await InventoryService.getInventoryWithSlot(ctx.from.id, slot)).length);
+    }
 
     equipItemScene.on("text", async ctx => {
         num = parseInt(ctx.message.text);
@@ -34,14 +43,14 @@ equipItemScene.enter(ctx => {
     });
 
     ctx.reply("Выберите слот, предмет в котором вы хотите поменять: ", Markup.inlineKeyboard([
-        [Markup.button.callback("Перчатки", "arms"),
-        Markup.button.callback("Штаны", "legs"),
-        Markup.button.callback("Обувь", "feet"),
-        Markup.button.callback("Левая рука", "lefthand")],
-        [Markup.button.callback("Правая рука", "righthand"),
-        Markup.button.callback("Шлем", "head"),
-        Markup.button.callback("Грудь", "thorax"),
-        Markup.button.callback("Вернуться", "back_to_equipment")]
+        [Markup.button.callback("🪖 Шлем (" + tooltips[5] + ")", "head")],
+        [Markup.button.callback("🤛🏼 Левая рука (" + tooltips[3] + ")", "lefthand"),
+        Markup.button.callback("👔 Грудь (" + tooltips[6] + ")", "thorax"),
+        Markup.button.callback("🤜🏼 Правая рука (" + tooltips[4] + ")", "righthand")],
+        [Markup.button.callback("🧤 Перчатки (" + tooltips[0] + ")", "arms"),
+        Markup.button.callback("👖 Штаны (" + tooltips[1] + ")", "legs"),
+        Markup.button.callback("👞 Обувь (" + tooltips[2] + ")", "feet")],
+        [Markup.button.callback("Вернуться", "back_to_equipment")]
     ]));
 
 
@@ -100,12 +109,19 @@ equipItemScene.enter(ctx => {
         ctx.scene.leave()
         ctx.scene.enter("equipment");
     });
+
+    equipItemScene.action("back_to_equip_item", ctx => {
+        ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+        ctx.scene.leave()
+        ctx.scene.enter("equip_item");
+    });
 });
 
-async function chooseItem(ctx: { from: { id: number; }; reply: (arg0: string, arg1: Markup.Markup<InlineKeyboardMarkup>) => void; }, current_slot: string) {
+async function chooseItem(ctx: any, current_slot: string) {
     const items = await InventoryService.getItemFromInventoryWithSlot(ctx.from.id, current_slot);
 
-    ctx.reply("Теперь выберите предмет, который вы хотите надеть:" + items.map((item, index) => ("\n" + (index + 1) + ". ") + item.name + " Сила: " + item.power)
-        + "\nЧтобы убрать предмет из слота введите 0",
-        Markup.inlineKeyboard([Markup.button.callback("Вернуться", "back_to_equipment")]));
+    ctx.replyWithHTML("Теперь выберите предмет, который вы хотите надеть:\n"
+        + items.map((item, index) => ("\n" + (index + 1) + ". <b>") + item.name + "</b> 👊🏼 " + item.power).join("")
+        + "\n\nЧтобы убрать предмет из слота введите 0",
+        Markup.inlineKeyboard([Markup.button.callback("Вернуться", "back_to_equip_item")]));
 }

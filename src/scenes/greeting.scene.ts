@@ -2,6 +2,7 @@ import { Markup, Scenes } from "telegraf";
 import { UserService } from "../services/user.service";
 import { IBotContext } from "../context/context.interface";
 import { AvatarsService } from "../services/avatars.service";
+import { deleteMarkup } from "../lib/deleteMarkup";
 
 export const greetingScene = new Scenes.BaseScene<IBotContext>("greeting");
 
@@ -13,7 +14,8 @@ greetingScene.enter(async (ctx) => {
         char_name: '',
         char_class: '',
         avatar: '',
-        id: 0
+        id: 0,
+        timesWrongInput: 0
     }
 
     if (ctx.from && await UserService.checkIfExists(ctx.from.id)) {
@@ -27,7 +29,7 @@ greetingScene.enter(async (ctx) => {
 
     ctx.reply("Введите имя своего персонажа (от 3 до до 15 символов)");
 
-    greetingScene.on('text', (ctx) => {
+    greetingScene.on('text', async (ctx) => {
         const typedText = ctx.message.text;
         switch (formState.stage) {
             case 0:
@@ -38,18 +40,22 @@ greetingScene.enter(async (ctx) => {
                 formState.char_name = typedText;
                 formState.id = ctx.from.id;
                 formState.stage++;
-                ctx.reply("Выберите класс вашего персонажа",
-                    Markup.inlineKeyboard([
+                await ctx.reply("Выберите класс вашего персонажа",
+                    Markup.inlineKeyboard([[
                         Markup.button.callback('Воин', 'warrior'),
                         Markup.button.callback('Маг', 'mage'),
-                        Markup.button.callback('Танк', 'tank')])
+                        Markup.button.callback('Танк', 'tank')],
+                    [Markup.button.callback('Вернуться', 'back')]])
                 );
                 break;
-            case 1:
+            case 2:
                 const num = parseInt(ctx.message.text);
                 if (!(num > 0 && num <= avatars.length)) {
                     ctx.reply("Неправильный номер аватара, попробуйте ещё");
+                    formState.timesWrongInput++;
                     break;
+                } else {
+                    deleteMarkup(ctx, ctx.chat.id, ctx.message.message_id - 1 - formState.timesWrongInput * 2 - avatars.length);
                 }
                 formState.avatar = avatars[num - 1];
                 UserService.create(formState.id, formState.char_name, formState.char_class, formState.avatar);
@@ -65,8 +71,9 @@ greetingScene.enter(async (ctx) => {
 
     function outputAvatars() {
         if (avatars.length > 0) {
+            formState.stage++;
+            ctx.reply("Введите номер вашей аватарки", Markup.inlineKeyboard([Markup.button.callback("Вернуться", "back")]));
             ctx.replyWithMediaGroup(avatars.map(link => { return { type: "photo", media: link } }));
-            ctx.reply("Введите номер вашей аватарки");
         } else {
             formState.avatar = 'https://imgs.search.brave.com/Od-zdPC5JdDndRmvNJUCGoNnOdKantqLuoUugEEV9LA/rs:fit:500:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5pc3RvY2twaG90/by5jb20vaWQvMTQ4/MzkyOTA4L3Bob3Rv/L2RvZy1vbi10aGUt/cGhvbmUuanBnP3M9/NjEyeDYxMiZ3PTAm/az0yMCZjPThNUEdR/NmhFMDV4eDh1VzNs/N3RER3N5NGtqSzlL/LW5ZanRfV0hHN3Zu/aW89';
             UserService.create(formState.id, formState.char_name, formState.char_class, formState.avatar);
@@ -81,16 +88,37 @@ greetingScene.enter(async (ctx) => {
 
     greetingScene.action("warrior", ctx => {
         formState.char_class = "warrior";
+        ctx.editMessageReplyMarkup({ inline_keyboard: [] });
         outputAvatars();
     });
 
     greetingScene.action("mage", ctx => {
         formState.char_class = "mage";
+        ctx.editMessageReplyMarkup({ inline_keyboard: [] });
         outputAvatars();
     });
 
     greetingScene.action("tank", ctx => {
         formState.char_class = "tank";
+        ctx.editMessageReplyMarkup({ inline_keyboard: [] });
         outputAvatars();
+    });
+
+    greetingScene.action("back", ctx => {
+        formState.stage--;
+        if (formState.stage === 0) {
+            ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+            ctx.reply("Введите имя своего персонажа (от 3 до до 15 символов)");
+        } else if (formState.stage === 1) {
+            formState.timesWrongInput = 0;
+            ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+            ctx.reply("Выберите класс вашего персонажа",
+                Markup.inlineKeyboard([[
+                    Markup.button.callback('Воин', 'warrior'),
+                    Markup.button.callback('Маг', 'mage'),
+                    Markup.button.callback('Танк', 'tank')],
+                [Markup.button.callback('Вернуться', 'back')]])
+            );
+        }
     });
 });

@@ -1,10 +1,14 @@
 import { Markup, Scenes } from "telegraf";
 import { IBotContext } from "../context/context.interface";
-import { InventoryDisplayed } from "./menu.scene";
 import { InventoryService } from "../services/inventory.service";
 import { ItemService } from "../services/item.service";
 import { MarketService } from "../services/market.service";
 import { deleteMarkup } from "../lib/deleteMarkup";
+
+type InventoryDisplayed = {
+    name: string,
+    power: number
+}
 
 export const createMarketOfferScene = new Scenes.BaseScene<IBotContext>("create_market_offer");
 
@@ -20,29 +24,34 @@ createMarketOfferScene.enter(async ctx => {
     let inventory_displayed: InventoryDisplayed[] = [];
 
     for (let item of inventory) {
-        inventory_displayed.push({ name: (await ItemService.getItem(item.item_id)).name });
+        inventory_displayed.push({ name: (await ItemService.getItem(item.item_id)).name, power:  (await ItemService.getItem(item.item_id)).power});
     }
 
-    let message = await ctx.reply(`В инвентаре содержится: ${inventory_displayed.map((item, index) => "\n" + (index + 1) + ". " + item.name)}` + "\nВведите номер предмета, который вы хотите выставить:",
+    let message = await ctx.replyWithHTML(`🎒 В вашем инвентаре содержится:\n${inventory_displayed.map(
+        (item, index) => "\n" + (index + 1) + ". <b>" + item.name + "</b> 👊🏼 " + item.power).join("")}`
+         + "\n\nВведите номер предмета, который вы хотите выставить",
         Markup.inlineKeyboard([Markup.button.callback("Вернуться", "back_to_market")]));
 
     let stage = 0;
 
+    let picked_item: number = 0;
     createMarketOfferScene.on('text', async ctx => {
         deleteMarkup(ctx, message.chat.id, ctx.message.message_id - 1);
         let num = parseInt(ctx.message.text);
-        let picked_item: number = 0;
 
         if (stage === 0) {
             if (num <= inventory.length && num > 0) {
                 picked_item = num - 1;
-                message = await ctx.reply("Вы выбрали предмет " + (await ItemService.getItem(inventory[picked_item].item_id)).name + " Теперь введите цену: ",
+                message = await ctx.replyWithHTML("Вы выбрали предмет <b>" + (await ItemService.getItem(inventory[picked_item].item_id)).name + "</b>\n\nТеперь введите цену",
                     Markup.inlineKeyboard([Markup.button.callback('Вернуться назад', 'back_to_market')]));
-                stage = stage + 1;
+                stage++;
             } else {
-                ctx.reply("Неверный номер предложения. Введите число заново:");
+                ctx.reply("Неверный номер предложения. Введите число заново", Markup.inlineKeyboard([Markup.button.callback('Вернуться назад', 'back_to_market')]));
             }
         } else if (stage === 1) {
+            if (picked_item < 0) {
+                throw Error("Wrong picked item!");
+            }
             MarketService.createOffer(ctx.from.id, num, inventory[picked_item].item_id, inventory[picked_item].id);
             ctx.reply("Предложение успешно создано!", Markup.inlineKeyboard([Markup.button.callback('Вернуться назад', 'back_to_market')]));
             stage = 0;

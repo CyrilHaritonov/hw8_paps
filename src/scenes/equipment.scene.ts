@@ -27,20 +27,25 @@ equipmentScene.enter(async ctx => {
         thorax: (await ItemService.getItem(user_data.thorax_item_equiped)).name,
         thorax_power: (await ItemService.getItem(user_data.thorax_item_equiped)).power
     }
-    ctx.reply("На вас экипировано:\nПерчатки: " + item_names.arms + " Сила: " + item_names.arms_power + "\nШтаны: " + item_names.legs + " Сила: " + item_names.legs_power
-     + "\nОбувь: " + item_names.feet + " Сила: " + item_names.feet_power + "\nЛевая рука: " + item_names.lefthand + " Сила: " + item_names.lefthand_power +
-      "\nПравая рука: " + item_names.righthand + " Сила: " + item_names.righthand_power + "\nШлем: " + item_names.head + " Сила: " + item_names.head_power 
-      + "\nГрудь: " + item_names.thorax + " Сила: " + item_names.thorax_power, Markup.inlineKeyboard([Markup.button.callback("Надеть предмет", "equip_item"),
-    Markup.button.callback("Вернуться", "back_to_menu")]));
+    ctx.replyWithHTML("🛡️ На вас экипировано:\n\n<b>🧤 Перчатки</b>: " + item_names.arms + " 👊🏼 " + item_names.arms_power
+        + "\n<b>👖 Штаны</b>: " + item_names.legs + " 👊🏼 " + item_names.legs_power
+        + "\n<b>👞 Обувь</b>: " + item_names.feet + " 👊🏼 " + item_names.feet_power
+        + "\n<b>🤛🏼 Левая рука</b>: " + item_names.lefthand + " 👊🏼 " + item_names.lefthand_power
+        + "\n<b>🤜🏼 Правая рука</b>: " + item_names.righthand + " 👊🏼 " + item_names.righthand_power
+        + "\n<b>🪖 Шлем</b>: " + item_names.head + " 👊🏼 " + item_names.head_power
+        + "\n<b>👔 Грудь</b>: " + item_names.thorax + " 👊🏼 " + item_names.thorax_power,
+        Markup.inlineKeyboard([
+            Markup.button.callback("🧥 Надеть предмет", "equip_item"),
+            Markup.button.callback("Вернуться", "back_to_menu")]));
 
     equipmentScene.action("equip_item", ctx => {
-        ctx.editMessageReplyMarkup({inline_keyboard: []});
+        ctx.editMessageReplyMarkup({ inline_keyboard: [] });
         ctx.scene.leave();
         ctx.scene.enter("equip_item");
     });
 
     equipmentScene.action("back_to_menu", ctx => {
-        ctx.editMessageReplyMarkup({inline_keyboard: []});
+        ctx.editMessageReplyMarkup({ inline_keyboard: [] });
         ctx.scene.leave();
         ctx.scene.enter("menu");
     });

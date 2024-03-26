@@ -78,7 +78,7 @@ shopScene.enter(async ctx => {
     shopScene.action("open_menu", ctx => {
         ctx.editMessageReplyMarkup({ inline_keyboard: [] });
         ctx.scene.leave();
-        ctx.scene.enter("menu");
+        ctx.scene.enter("shopping_district");
     });
 
     shopScene.action("shop", ctx => {

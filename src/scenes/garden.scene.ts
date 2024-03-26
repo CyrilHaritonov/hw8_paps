@@ -56,7 +56,7 @@ gardenScene.action('display_garden', async ctx => {
 gardenScene.action('back_to_menu', ctx => {
     ctx.editMessageReplyMarkup({ inline_keyboard: [] });
     ctx.scene.leave();
-    ctx.scene.enter("menu");
+    ctx.scene.enter("fortress");
 });
 
 gardenScene.action(/^pot_(\d+)$/, async ctx => {

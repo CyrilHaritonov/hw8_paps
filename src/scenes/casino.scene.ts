@@ -13,7 +13,8 @@ casinoScene.enter(async ctx => {
 
     let game_num = -1;
 
-    let message = await ctx.reply("Есть следующие игры:" + games.map((game, index) => "\n" + (index + 1) + ". " + game.name) + "\nВведите номер игры, в которую вы хотели бы поиграть",
+    let message = await ctx.replyWithHTML("🎮 Есть следующие игры:\n" + games.map((game, index) => "\n" + (index + 1) + ". <b>" + game.name + "</b>")
+     + "\n\nВведите номер игры, в которую вы хотели бы поиграть",
         Markup.inlineKeyboard([Markup.button.callback("Вернуться", "back_to_menu")]));
 
     casinoScene.on("text", async ctx => {
@@ -29,9 +30,9 @@ casinoScene.enter(async ctx => {
                 }
             }
             game_num = num - 1;
-            ctx.reply("Информация о игре: \n" + games[num - 1].name + "\nЦена участия: " + games[num - 1].price + "\nВозможные призы: " +
+            ctx.replyWithHTML("Информация о игре:\n\n<b>" + games[num - 1].name + "</b>\nЦена участия в 💰 " + games[num - 1].price + "\nВозможные призы: " +
                 prizes.filter(value => value !== "Ничего").join(", "),
-                Markup.inlineKeyboard([Markup.button.callback("Играть", "play"), Markup.button.callback("Вернуться к списку", "back")]));
+                Markup.inlineKeyboard([Markup.button.callback("💸 Играть", "play"), Markup.button.callback("Вернуться к списку", "back")]));
         } else {
             ctx.reply("Неверный номер игры, попробуйте снова", Markup.inlineKeyboard([Markup.button.callback("Вернуться к списку", "back")]));
         }
@@ -46,7 +47,7 @@ casinoScene.enter(async ctx => {
     casinoScene.action("back_to_menu", ctx => {
         ctx.editMessageReplyMarkup({ inline_keyboard: [] });
         ctx.scene.leave();
-        ctx.scene.enter("menu");
+        ctx.scene.enter("shopping_district");
     });
 
     casinoScene.action("play", async ctx => {
@@ -57,9 +58,10 @@ casinoScene.enter(async ctx => {
         let result = await CasinoService.play(games[game_num].id, ctx.from.id);
 
         ctx.replyWithPhoto(games[game_num].pictures[result], {
-            caption: "Ваш результат: " + games[game_num].outcomes[result]
-                + "\nВы выиграли: " + (games[game_num].prizes[result] !== 0 ? (await ItemService.getItem(games[game_num].prizes[result])).name : "Ничего"),
-            reply_markup: { inline_keyboard: [[{ text: "Сыграть ещё", callback_data: "play" }, { text: "Вернуться", callback_data: "back" }]] }
+            caption: "Ваш результат: <b>" + games[game_num].outcomes[result]
+                + "</b>\nВы выиграли: <b>" + (games[game_num].prizes[result] !== 0 ? (await ItemService.getItem(games[game_num].prizes[result])).name : "Ничего") + "</b>",
+                parse_mode: "HTML",
+            reply_markup: { inline_keyboard: [[{ text: "💸 Сыграть ещё", callback_data: "play" }, { text: "Вернуться", callback_data: "back" }]] }
         });
     });
 });

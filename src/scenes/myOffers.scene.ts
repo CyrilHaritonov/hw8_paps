@@ -21,9 +21,9 @@ myOffersScene.enter(async ctx => {
         names.push((await ItemService.getItem(offer.item_id)).name)
     }
 
-    let message = await ctx.reply("Предложения выставленные вами:" + offers.map((offer, index) =>
-        "\n" + (index + 1) + ". " + names[index] + " Цена в деньгах: " + offer.price)
-        + "\n Чтобы удалить, какое-либо из предложений введите его номер:", Markup.inlineKeyboard([Markup.button.callback('Вернуться', 'back_to_market')]));
+    let message = await ctx.replyWithHTML("Предложения выставленные вами:\n" + offers.map((offer, index) =>
+        "\n" + (index + 1) + ". <b>" + names[index] + "</b> Цена в 💰 <b>" + offer.price + "</b>").join("")
+        + "\n\nЧтобы удалить, какое-либо из предложений введите его номер", Markup.inlineKeyboard([Markup.button.callback('Вернуться', 'back_to_market')]));
 
     myOffersScene.on('text', async ctx => {
         deleteMarkup(ctx, message.chat.id, ctx.message.message_id - 1);
@@ -35,7 +35,7 @@ myOffersScene.enter(async ctx => {
                     Markup.inlineKeyboard([Markup.button.callback('Вернуться назад', 'back_to_market')]));
             }
         } else {
-            ctx.reply("Неверный номер предложения. Введите число заново:",
+            ctx.reply("Неверный номер предложения. Введите число заново",
                 Markup.inlineKeyboard([Markup.button.callback('Вернуться назад', 'back_to_market')]));
         }
     });
