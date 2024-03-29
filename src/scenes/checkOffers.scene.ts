@@ -41,6 +41,9 @@ checkOffersScene.enter(ctx => {
                 if (await MarketService.buyOffer(ctx.from.id, offers[num - 1].id)) {
                     ctx.reply("Предмет успешно куплен!",
                         Markup.inlineKeyboard([Markup.button.callback('Искать снова', 'search'), Markup.button.callback('Вернуться назад', 'back_to_market')]));
+                } else {
+                    ctx.reply("Не удалось приобрести предмет, возможно на счету не хватает средств или предложение уже неактуально",
+                        Markup.inlineKeyboard([Markup.button.callback('Искать снова', 'search'), Markup.button.callback('Вернуться назад', 'back_to_market')]));
                 }
             } else {
                 ctx.reply("Неверный номер предложения. Введите число заново:",

@@ -4,7 +4,6 @@ import { ShopService } from "../services/shop.service";
 import { ItemService } from "../services/item.service";
 import { Markup, Scenes } from "telegraf";
 import { InlineKeyboardMarkup } from "telegraf/typings/core/types/typegram";
-import { deleteMarkup } from "../lib/deleteMarkup";
 
 export const shopScene = new Scenes.BaseScene<IBotContext>("shop");
 
@@ -20,6 +19,11 @@ export type OffersDisplayed = {
     currency_type: string
 }
 
+const formState = {
+    num: 1,
+    message_id: 0
+}
+
 shopScene.enter(async ctx => {
     const offers: Shop[] = await ShopService.getOffers();
 
@@ -27,8 +31,11 @@ shopScene.enter(async ctx => {
 
     const offers_displayed: OffersDisplayed[] = [];
 
+    formState.num = 1;
+
     for (let offer of offers) {
         const item = await ItemService.getItem(offer.item_id);
+
         offers_displayed.push({
             id: offer.id,
             name: item.name,
@@ -42,37 +49,34 @@ shopScene.enter(async ctx => {
         });
     }
 
-    ctx.reply(`Есть следующие предложения: ${offers_displayed.map((item, index) => "\n" + (index + 1) + ". " + item.name + ", сила: " + item.power + ", цены: " + item.price + " денег, " + item.rm_price + " золота") + "\n Чтобы посмотреть нужное предложение подробнее введите его номер"}`, Markup.inlineKeyboard([Markup.button.callback("Вернуться в меню", "open_menu")]));
+    formState.message_id = (await ctx.replyWithPhoto("https://webshop.abo.fi/wp-content/uploads/woocommerce-placeholder-600x600.png",
+        {
+            reply_markup: { inline_keyboard: [[{ text: "Вернуться в меню", callback_data: "open_menu" }]] },
+            caption: "Добро пожаловать в магазин! Происходит загрузка предложений..."
+        })).message_id;
 
-    shopScene.on("text", ctx => {
-        deleteMarkup(ctx, ctx.chat.id, ctx.message.message_id - 1);
-        const num = parseInt(ctx.message.text);
-        if (num > 0 && num <= offers_displayed.length) {
-            const inline_keyboard: InlineKeyboardMarkup = {inline_keyboard: [[{ text: 'Назад', callback_data: 'shop' }]]};
-            if (offers_displayed[num - 1].currency_type === "both") {
-                inline_keyboard.inline_keyboard.unshift([{ text: 'Купить за деньги', callback_data: 'buy_with_money' }], [{ text: 'Купить за золото', callback_data: 'buy_with_rm_currency' }]);
-            } else if (offers_displayed[num - 1].currency_type === "money") {
-                inline_keyboard.inline_keyboard.unshift([{ text: 'Купить за деньги', callback_data: 'buy_with_money' }]);
-            } else if (offers_displayed[num - 1].currency_type === "rm_currency") {
-                inline_keyboard.inline_keyboard.unshift([{ text: 'Купить за золото', callback_data: 'buy_with_rm_currency' }]);
-            }
-            ctx.replyWithPhoto({ url: offers_displayed[num - 1].picture }, { reply_markup: inline_keyboard, caption: "Информация о предмете:\nНазвание: "
-             + offers_displayed[num - 1].name + ",\nСила: " + offers_displayed[num - 1].power + ",\nЦены: " + offers_displayed[num - 1].price 
-             + " " + offers_displayed[num - 1].rm_price + ",\nНадевается в слот: " + offers_displayed[num - 1].slot + "\nОписание: " 
-             + offers_displayed[num - 1].description });
+    showOffer(ctx, offers_displayed, formState.num, formState.message_id);
+
+    shopScene.action("buy_with_money", async ctx => {
+        ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+        const result = await ShopService.buyOfferWithMoney(offers_displayed[formState.num - 1].id, ctx.from.id);
+        if (result) {
+            ctx.reply("Предмет куплен", Markup.inlineKeyboard([Markup.button.callback("Вернуться к меню", "open_menu")]));
         } else {
-            ctx.reply("Неправильный номер предложения, попробуйте снова.", Markup.inlineKeyboard([Markup.button.callback("Вернуться в меню", "open_menu")]));
+            ctx.reply("Не удалось купить предмет, возможно на вашем счету недостаточно средств!",
+                Markup.inlineKeyboard([Markup.button.callback("Вернуться к меню", "open_menu")]));
         }
-        shopScene.action("buy_with_money", ctx => {
-            ctx.editMessageReplyMarkup({inline_keyboard: []});
-            ShopService.buyOfferWithMoney(offers_displayed[num - 1].id, ctx.from.id);
-            ctx.reply("Предмет куплен", Markup.inlineKeyboard([Markup.button.callback("Вернуться к списку", "shop")]));
-        });
-        shopScene.action("buy_with_rm_currency", ctx => {
-            ctx.editMessageReplyMarkup({inline_keyboard: []});
-            ShopService.buyOfferWithRMCurrency(offers_displayed[num - 1].id, ctx.from.id);
-            ctx.reply("Предмет куплен", Markup.inlineKeyboard([Markup.button.callback("Вернуться к списку", "shop")]));
-        });
+    });
+
+    shopScene.action("buy_with_rm_currency", async ctx => {
+        ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+        const result = await ShopService.buyOfferWithRMCurrency(offers_displayed[formState.num - 1].id, ctx.from.id);
+        if (result) {
+            ctx.reply("Предмет куплен", Markup.inlineKeyboard([Markup.button.callback("Вернуться в меню", "open_menu")]));
+        } else {
+            ctx.reply("Не удалось купить предмет, возможно на вашем счету недостаточно средств!",
+                Markup.inlineKeyboard([Markup.button.callback("Вернуться к меню", "open_menu")]));
+        }
     });
 
     shopScene.action("open_menu", ctx => {
@@ -81,9 +85,55 @@ shopScene.enter(async ctx => {
         ctx.scene.enter("shopping_district");
     });
 
-    shopScene.action("shop", ctx => {
-        ctx.editMessageReplyMarkup({ inline_keyboard: [] });
-        ctx.scene.leave();
-        ctx.scene.enter("shop");
+    shopScene.action("prev_item", ctx => {
+        if (formState.num === 1) {
+            return;
+        }
+
+        formState.num--;
+
+        showOffer(ctx, offers_displayed, formState.num, formState.message_id);
     });
+
+    shopScene.action("next_item", ctx => {
+        if (formState.num + 1 > offers_displayed.length) {
+            return;
+        }
+
+        formState.num++;
+
+        showOffer(ctx, offers_displayed, formState.num, formState.message_id);
+    });
+
+    function showOffer(ctx: IBotContext, offers: OffersDisplayed[], num: number, message_id: number): void {
+
+        if (num - 1 < 0 || num - 1 >= offers.length) {
+            return;
+        }
+
+        const inline_keyboard: InlineKeyboardMarkup = {
+            inline_keyboard: [[{ text: '<<< (ещё ' + (num - 1) + ')', callback_data: 'prev_item' },
+            { text: '(ещё ' + (offers.length - num) + ') >>>', callback_data: 'next_item' }],
+            [{ text: 'Вернуться в меню', callback_data: 'open_menu' }]]
+        };
+
+        if (offers[num - 1].currency_type === "both") {
+            inline_keyboard.inline_keyboard.unshift([{ text: 'Купить за деньги', callback_data: 'buy_with_money' }],
+                [{ text: 'Купить за золото', callback_data: 'buy_with_rm_currency' }]);
+        } else if (offers[num - 1].currency_type === "money") {
+            inline_keyboard.inline_keyboard.unshift([{ text: 'Купить за деньги', callback_data: 'buy_with_money' }]);
+        } else if (offers[num - 1].currency_type === "rm_currency") {
+            inline_keyboard.inline_keyboard.unshift([{ text: 'Купить за золото', callback_data: 'buy_with_rm_currency' }]);
+        }
+
+        ctx.telegram.editMessageMedia(ctx.chat?.id, message_id, undefined, {
+            media: offers[num - 1].picture, type: "photo",
+            caption: "🛍️ Для вас сегодня есть <b>" + offers.length + "</b> предложений:\n\n⌨ Название предмета: <b>"
+                + offers[num - 1].name + "</b>\n👊🏼 Сила: <b> " + offers[num - 1].power + "</b>\n💎 Цены: <b>" +
+                (offers[num - 1].currency_type === "both" || offers[num - 1].currency_type === "money" ? offers[num - 1].price + "💰" : "")
+                + (offers[num - 1].currency_type === "both" || offers[num - 1].currency_type === "rm_currency" ? " " + offers[num - 1].rm_price + " 🟡" : "")
+                + "</b>\n👚 Надевается в слот: <b>" + offers[num - 1].slot + "</b>\n📃 Описание: <b>"
+                + offers[num - 1].description + "</b>", parse_mode: "HTML"
+        }, { reply_markup: inline_keyboard });
+    }
 });
