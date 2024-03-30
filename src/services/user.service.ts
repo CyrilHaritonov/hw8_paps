@@ -229,24 +229,24 @@ export class UserService {
 
             const user = await this.getUserInfo(userId);
             switch (potNumber) {
-            case 1:
-                user.pot_1 = pot;
-                break;
-            case 2:
-                user.pot_2 = pot;
-                break;
-            case 3:
-                user.pot_3 = pot;
-                break;
-            case 4:
-                user.pot_4 = pot;
-                break;
-            case 5:
-                user.pot_5 = pot;
-                break;
-            default:
-                break;
-        }
+                case 1:
+                    user.pot_1 = pot;
+                    break;
+                case 2:
+                    user.pot_2 = pot;
+                    break;
+                case 3:
+                    user.pot_3 = pot;
+                    break;
+                case 4:
+                    user.pot_4 = pot;
+                    break;
+                case 5:
+                    user.pot_5 = pot;
+                    break;
+                default:
+                    break;
+            }
             await this.saveUser(user);
             return pot;
         } else {
@@ -274,12 +274,27 @@ export class UserService {
     }
 
     static async getNameById(userId: number): Promise<string> {
-        const result = await this.userRepo.findBy({id: userId});
+        const result = await this.userRepo.findBy({ id: userId });
         if (result.length > 0) {
             return result[0].char_name;
         } else {
             throw Error("No user wtih such id" + userId);
         }
+    }
+
+    static async getCharPower(user_id: number): Promise<number> {
+        const user = await this.getUserInfo(user_id);
+        let result = 0;
+
+        result += await ItemService.getItemPower(user.head_item_equiped);
+        result += await ItemService.getItemPower(user.thorax_item_equiped);
+        result += await ItemService.getItemPower(user.righthand_item_equiped);
+        result += await ItemService.getItemPower(user.lefthand_item_equiped);
+        result += await ItemService.getItemPower(user.arms_item_equiped);
+        result += await ItemService.getItemPower(user.legs_item_equiped);
+        result += await ItemService.getItemPower(user.feet_item_equiped);
+        
+        return result;
     }
 }
 

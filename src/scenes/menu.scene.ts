@@ -41,7 +41,8 @@ menuScene.enter(async (ctx) => {
                         return "танк";
                 }})()
             + "</b>\n🗡 Клан: не состоит в клане"
-            + "\n💸 На счету " + userData.money + " 💰 и " + userData.rm_currency + " 🟡",
+            + "\n👊🏼 Общая сила: <b>" + await UserService.getCharPower(ctx.from.id)
+            + "</b>\n💸 На счету " + userData.money + " 💰 и " + userData.rm_currency + " 🟡",
             reply_markup: { inline_keyboard: inlineKeyboard 
             }, parse_mode: "HTML"
         });

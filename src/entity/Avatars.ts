@@ -7,4 +7,7 @@ export class Avatars {
 
     @Column()
     link: string;
+
+    @Column()
+    link_with_num: string;
 }

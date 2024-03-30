@@ -49,4 +49,16 @@ export class ItemService {
             throw Error("No item with such id" + item_id);
         }
     }
+
+    static async getItemPower(item_id: number): Promise<number> {
+        if (item_id === 0) {
+            return 0;
+        }
+        const res: Item[] = await this.itemRepo.findBy({ id: item_id });
+        if (res.length) {
+            return res[0].power;
+        } else {
+            throw Error("No item with such id" + item_id);
+        }
+    }
 }
