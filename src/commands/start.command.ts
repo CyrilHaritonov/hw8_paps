@@ -1,4 +1,4 @@
-import { Markup, Scenes, Telegraf } from "telegraf";
+import {Telegraf } from "telegraf";
 import { Command } from "./command.class";
 import { IBotContext } from "../context/context.interface";
 
@@ -8,6 +8,14 @@ export class StartCommand extends Command {
     }
 
     handle(): void {
-        this.bot.command("start", ctx => ctx.scene.enter("greeting"));
+        this.bot.command("start", async ctx => {  
+            const deepLinkPayload = ctx.message.text.substring(6).trim();
+            if (deepLinkPayload) {
+                ctx.session.deepLinkPayload = deepLinkPayload
+                ctx.scene.enter("clan_invite")
+            } else {
+                ctx.scene.enter("greeting")
+            }     
+        });
     }
 }

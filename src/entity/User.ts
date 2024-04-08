@@ -1,5 +1,6 @@
-import { Entity, Column, PrimaryColumn, OneToOne, JoinColumn } from "typeorm"
+import { Entity, Column, PrimaryColumn, OneToOne, JoinColumn, ManyToOne } from "typeorm"
 import { Pot } from "./Pot";
+import { Clan } from "./Clan";
 
 @Entity()
 export class User {
@@ -69,4 +70,13 @@ export class User {
     @OneToOne(() => Pot, { nullable: true })
     @JoinColumn()
     pot_5: Pot | null;
+
+    // clan 
+    @ManyToOne(() => Clan, clan => clan.members)
+    clan: Clan | null;
+
+    // walk 
+
+    @Column({ type: 'timestamp', nullable: true })
+    last_walk: Date | null;
 }

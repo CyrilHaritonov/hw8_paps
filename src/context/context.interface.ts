@@ -1,8 +1,9 @@
 import { Context, Scenes } from "telegraf";
 
-export interface SessionData {
-    
+export interface SessionData extends Scenes.SceneSession {
+    deepLinkPayload?: string;
 }
+
 
 export interface IBotSceneSession extends Scenes.SceneSessionData {
 

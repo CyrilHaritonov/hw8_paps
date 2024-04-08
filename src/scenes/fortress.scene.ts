@@ -10,6 +10,7 @@ fortressScene.enter(ctx => {
     ctx.reply("🏰 Добро пожаловать в крепость!\n\nЗдесь вы можете взаимодействовать с другими игроками и заниматься фермерством",
         Markup.inlineKeyboard([[Markup.button.callback("🌽 Сад", "garden")],
         [Markup.button.callback("🤴🏼 Кланы", "clans")],
+        [Markup.button.callback("🏞🌳Прогулка", "walk")],
         [Markup.button.callback("Вернуться", "back_to_menu")]
         ]));
 
@@ -20,9 +21,15 @@ fortressScene.enter(ctx => {
     });
 
     fortressScene.action("clans", ctx => {
-        // ctx.editMessageReplyMarkup({ inline_keyboard: [] });
-        // ctx.scene.leave();
-        // ctx.scene.enter("clans");
+        ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+        ctx.scene.leave();
+        ctx.scene.enter("clan");
+    });
+
+    fortressScene.action("walk", ctx => {
+        ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+        ctx.scene.leave();
+        ctx.scene.enter("walk");
     });
 
     fortressScene.action("back_to_menu", ctx => {

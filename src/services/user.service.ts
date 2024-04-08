@@ -30,6 +30,30 @@ export class UserService {
         await this.userRepo.save(user)
     }
 
+    static async checkForClan(user_id: number): Promise<ClanCheckResult> {
+        const userWithClan = await this.userRepo.findOne({
+            where: { id: user_id },
+            relations: ['clan', 'clan.administrator'],
+        });
+    
+        if (userWithClan && userWithClan.clan) {
+            const { id, name, description, uniqueInvitationCode, level, administrator } = userWithClan.clan;
+            return {
+                isInClan: true,
+                clanDetails: {
+                    id,
+                    name,
+                    description,
+                    uniqueInvitationCode,
+                    level,
+                    administrator,
+                },
+            };
+        } else {
+            return { isInClan: false };
+        }
+    }
+
     static async checkIfExists(user_id: number): Promise<boolean> {
         return await this.userRepo.existsBy({ id: user_id });
     }
@@ -63,6 +87,17 @@ export class UserService {
         } else {
             throw Error("No user with such id");
         }
+    }
+
+    static async updateUserWalk(userId: number, walkTime: Date, reward: number = 0): Promise<void> {
+
+        const user = await this.userRepo.findOneBy({ id: userId });
+        if (!user) throw new Error("User not found");
+
+        user.last_walk = walkTime;
+        user.money += reward; 
+
+        await this.userRepo.save(user);
     }
 
     static payWithMoney(user_id: number, amount: number): void {
@@ -302,4 +337,16 @@ interface UserPotPlantInfo {
     userId: number;
     charName: string;
     pots: (Pot | null)[];
+}
+
+interface ClanCheckResult {
+    isInClan: boolean;
+    clanDetails?: {
+        id: number;
+        name: string;
+        description: string;
+        level: number;
+        uniqueInvitationCode: string;
+        administrator: User
+    };
 }

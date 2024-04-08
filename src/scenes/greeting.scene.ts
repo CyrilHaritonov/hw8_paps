@@ -69,7 +69,7 @@ greetingScene.enter(async (ctx) => {
         }
     });
 
-    function outputAvatars() {
+    function outputAvatars(ctx: IBotContext) {
         if (avatars.length > 0) {
             formState.stage++;
             ctx.reply("Введите номер вашей аватарки", Markup.inlineKeyboard([Markup.button.callback("Вернуться", "back")]));
@@ -89,19 +89,19 @@ greetingScene.enter(async (ctx) => {
     greetingScene.action("warrior", ctx => {
         formState.char_class = "warrior";
         ctx.editMessageReplyMarkup({ inline_keyboard: [] });
-        outputAvatars();
+        outputAvatars(ctx);
     });
 
     greetingScene.action("mage", ctx => {
         formState.char_class = "mage";
         ctx.editMessageReplyMarkup({ inline_keyboard: [] });
-        outputAvatars();
+        outputAvatars(ctx);
     });
 
     greetingScene.action("tank", ctx => {
         formState.char_class = "tank";
         ctx.editMessageReplyMarkup({ inline_keyboard: [] });
-        outputAvatars();
+        outputAvatars(ctx);
     });
 
     greetingScene.action("back", ctx => {
