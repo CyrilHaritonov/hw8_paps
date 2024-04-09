@@ -7,12 +7,15 @@ shoppingDistrictScene.enter(ctx => {
 
     console.log("inside shopping district");
 
-    ctx.reply("💰 Добро пожаловать в торговый квартал!\n\nЗдесь вы можете обзовестись новыми вещами или заработать, продав собственные",
-     Markup.inlineKeyboard([[Markup.button.callback("🏬 Рынок", "market")],
-      [Markup.button.callback("🛒 Магазин", "shop")],
-       [Markup.button.callback("🎲 Казино", "casino")],
-       [Markup.button.callback("Вернуться", "back_to_menu")]
-    ]));
+    ctx.replyWithPhoto("https://ibb.co/HzywQg5", {
+        caption: "💰 Добро пожаловать в торговый квартал!\n\nЗдесь вы можете обзовестись новыми вещами или заработать, продав собственные",
+        reply_markup: { inline_keyboard: [[Markup.button.callback("🏬 Рынок", "market")],
+        [Markup.button.callback("🛒 Магазин", "shop")],
+         [Markup.button.callback("🎲 Казино", "casino")],
+         [Markup.button.callback("Вернуться", "back_to_menu")]
+      ] 
+        }, parse_mode: "HTML"
+    });
 
     shoppingDistrictScene.action("shop", ctx => {
         ctx.editMessageReplyMarkup({ inline_keyboard: [] });

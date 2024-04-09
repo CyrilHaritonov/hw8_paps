@@ -7,12 +7,16 @@ fortressScene.enter(ctx => {
 
     console.log("inside fortress");
 
-    ctx.reply("🏰 Добро пожаловать в крепость!\n\nЗдесь вы можете взаимодействовать с другими игроками и заниматься фермерством",
-        Markup.inlineKeyboard([[Markup.button.callback("🌽 Сад", "garden")],
-        [Markup.button.callback("🤴🏼 Кланы", "clans")],
-        [Markup.button.callback("🏞🌳Прогулка", "walk")],
-        [Markup.button.callback("Вернуться", "back_to_menu")]
-        ]));
+    ctx.replyWithPhoto("https://ibb.co/Npxz4QV", {
+        caption: "🏰 Добро пожаловать в крепость!\n\nЗдесь вы можете взаимодействовать с другими игроками и заниматься фермерством",
+        reply_markup: { inline_keyboard: [
+            [Markup.button.callback("🌽 Сад", "garden")],
+            [Markup.button.callback("🤴🏼 Кланы", "clans")],
+            [Markup.button.callback("🏞🌳Прогулка", "walk")],
+            [Markup.button.callback("Вернуться", "back_to_menu")]
+        ] 
+        }, parse_mode: "HTML"
+    });
 
     fortressScene.action("garden", ctx => {
         ctx.editMessageReplyMarkup({ inline_keyboard: [] });
