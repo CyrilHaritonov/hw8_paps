@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: wod-course
+spec:
+  selector:
+    app: wod-course
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wod-course
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: wod-course
+  template:
+    metadata:
+      labels:
+        app: wod-course
+    spec:
+      containers:
+        - name: wod-course
+          image: viruspetya/wod-course:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: DATABASE_HOST
+              value: "postgres"
+            - name: DATABASE_USER
+              value: "cyril"
+            - name: DATABASE_PASSWORD
+              value: "gigapassword"
+            - name: DATABASE_NAME
+              value: "wod_db"
